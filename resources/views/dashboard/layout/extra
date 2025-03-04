@@ -1,0 +1,160 @@
+
+dashboard/layout/admin_sidebar.blade.php:-  
+
+
+@php $settlement_management = json_decode($allow_access->settlement_management);
+            array_unshift($settlement_management, 0);@endphp
+            @if($settlement_management[1] == 21 || $settlement_management[2] == 22)
+                <div class="nav-item dropdown">
+
+                    <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"><i
+                            class="fa fa-laptop me-2"></i>Settlement Management</a>
+                    <div class="dropdown-menu bg-transparent border-0">
+                        @if($settlement_management[1] == 21)
+                            <a href="{{route('area.create')}}" class="dropdown-item">Create</a>
+                        @endif
+                        @if($settlement_management[2] == 22)
+                            <a href="{{route('area.list')}}" class="dropdown-item">List</a>
+                        @endif
+                    </div>
+                </div>
+            @endif
+            
+            
+            role create 
+            
+            
+             <div class="row">
+                     <div class="accordion my-4" id="accordionExample1">
+                        <div class="accordion-item">
+                           <h2 class="accordion-header" id="headingtwo">
+                              <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                 data-bs-target="#side_bar7" aria-expanded="false" aria-controls="collapseOne">
+                                 Settlement Managament
+                              </button>
+                           </h2>
+                           <div id="side_bar7" class="accordion-collapse collapse " aria-labelledby="headingtwo"
+                              data-bs-parent="#accordionExample1">
+                              <div class="accordion-body ">
+                                 <div class="row">
+                                    <div class="col-md-12 ">
+                                       <nav aria-label="breadcrumb" class="text-right">
+                                          <ol class="breadcrumb text-right">
+                                             <li><a href="#"
+                                                   onclick='seleccheckboxName("settlement_management", event)'>select
+                                                   all</a>&nbsp;</li>
+                                             <li> <span> | </span>&nbsp;<a href="#"
+                                                   onclick='unselectAll("settlement_management", event)'>Deselect
+                                                   all</a>&nbsp;</li>
+                                          </ol>
+                                       </nav>
+                                    </div>
+                                 </div>
+                                 <div class="row  p-2">
+                                    @foreach($settlement as $item)
+                              <div class="form-check col-md-3">
+                                 <input class="form-check-input settlement_management" type="checkbox"
+                                   value='{{$item->id}}' name='settlement_management[]'>
+                                 <label class="form-check-label">
+                                   {{$item->name}}
+                                 </label>
+                              </div>
+                           @endforeach
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  
+                  
+                  
+                  role edit 
+                  
+                  
+                   <div class="row">
+                            <div class="accordion my-4" id="accordionExample1">
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="headingtwo">
+                                        <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                            data-bs-target="#side_bar7" aria-expanded="false"
+                                            aria-controls="collapseOne">
+                                            Settlement Managament
+                                        </button>
+                                    </h2>
+                                    <div id="side_bar7" class="accordion-collapse collapse "
+                                        aria-labelledby="headingtwo" data-bs-parent="#accordionExample1">
+                                        <div class="accordion-body ">
+                                            <div class="row">
+                                                <div class="col-md-12 ">
+                                                    <nav aria-label="breadcrumb" class="text-right">
+                                                        <ol class="breadcrumb text-right">
+                                                            <li><a href="#"
+                                                                    onclick='seleccheckboxName("settlement_management", event)'>select
+                                                                    all</a>&nbsp;</li>
+                                                            <li> <span> | </span>&nbsp;<a href="#"
+                                                                    onclick='unselectAll("settlement_management", event)'>Deselect
+                                                                    all</a>&nbsp;</li>
+                                                        </ol>
+                                                    </nav>
+                                                </div>
+                                            </div>
+                                            <div class="row  p-2">
+                                                @foreach($settlement as $item)
+                                                                                                @php
+                                                                                                    $settlement = json_decode($role->settlement_management);
+                                                                                                @endphp
+                                                                                                @if($settlement && in_array($item->id, $settlement))
+                                                                                                    <div class="form-check col-md-3">
+                                                                                                        <input class="form-check-input settlement_management"
+                                                                                                            type="checkbox" checked value='{{$item->id}}'
+                                                                                                            name='settlement_management[]'>
+                                                                                                        <label class="form-check-label">
+                                                                                                            {{$item->name}}
+                                                                                                        </label>
+                                                                                                    </div>
+                                                                                                @else
+                                                                                                    <div class="form-check col-md-3">
+                                                                                                        <input class="form-check-input settlement_management"
+                                                                                                            type="checkbox" value='{{$item->id}}'
+                                                                                                            name='settlement_management[]'>
+                                                                                                        <label class="form-check-label">
+                                                                                                            {{$item->name}}
+                                                                                                        </label>
+                                                                                                    </div>
+                                                                                                @endif                                                  @endforeach
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            
+                            
+                            
+                            
+                            user edit 
+                            
+                            <div class="mb-3 col-12">
+                                <label class="form-label">Settlement</label>
+                                <select name="area_id" id="area" class="form-control">
+                                        <option value="">Select Settlement</option>
+                                    @foreach($settlement as $item)
+                                    <option value='{{$item->id}}' {{$item->id ==$user->area_id ? 'selected': ''}}>{{$item->name}}</option>
+                                    @endforeach
+                                   
+                                </select>
+
+                            </div>
+                            
+                            user create 
+                            <div class="mb-3 col-6">
+                                <label class="form-label">Settlement</label>
+                                <select name="area_id" id="area" class="form-control">
+
+                                        <option value="">Select Settlement</option>
+                                   
+                                </select>
+
+                            </div>
+                        </div>

@@ -1,0 +1,50 @@
+# Ignore environment configuration
+.env
+.env.example
+
+# Ignore cache and logs
+bootstrap/cache/
+storage/*.log
+storage/logs/
+storage/framework/*
+storage/app/public/*
+
+# Ignore vendor and node_modules
+/vendor
+/node_modules
+
+# Ignore IDE/editor files
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore composer and npm lock files (if you don't want to track them)
+composer.lock
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Ignore PHPUnit test results
+phpunit.xml
+phpunit.xml.dist
+
+# Ignore Laravel Mix and Webpack files
+/public/hot
+/public/storage
+/public/mix-manifest.json
+/public/build
+/resources/assets/js/.temp/
+
+# Ignore Docker files (if using Docker)
+docker-compose.override.yml
+
+# Ignore SQLite database (if using SQLite)
+database/database.sqlite
+
+# Ignore user uploads (if needed)
+storage/app/uploads/

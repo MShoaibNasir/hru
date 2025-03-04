@@ -1,0 +1,48 @@
+<?php
+
+namespace App\Exports;
+
+use Maatwebsite\Excel\Concerns\FromArray;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+
+class FristTrenchData implements FromArray, WithHeadings
+{
+    protected $data;
+
+    // Constructor to pass the data
+    public function __construct($data)
+    {
+        $this->data = $data;
+    }
+
+    /**
+     * Return an array to be exported.
+     *
+     * @return array
+     */
+    public function array(): array
+    {
+        return $this->data;
+    }
+
+    /**
+     * Define the column headings.
+     *
+     * @return array
+     */
+    public function headings(): array
+    {
+        return [
+            'Beneficiary Name', // Heading for first column
+            'Father Name',      // Heading for second column
+            'CNIC',             // Heading for third column
+            'Beneficiary ID',   // Heading for fourth column
+            'Marital Status',   // Heading for fifth column
+            'Account Number',  
+            'Bank Name',      
+            'Bank Address',    
+            'Beneficiary Bank', 
+            'Amount'
+        ];
+    }
+}
