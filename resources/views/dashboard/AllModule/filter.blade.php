@@ -7,6 +7,9 @@ input.form-control.btn.btn-success.my-4 {
 .hover-btn:hover{
     color:white !important;
 }
+td {
+    text-align: left;
+}
 </style>
 
 
@@ -29,7 +32,26 @@ input.form-control.btn.btn-success.my-4 {
                                         	<div class="filters-toolbar-wrapper">
                                         	    
                                         <div class="row">
-                                            <div class="filters-toolbar__item mb-3 col-md-4">
+
+
+                                        <div class="filters-toolbar__item mb-3 col-md-4">
+                                                      <label for="form">Search by Form Name</label>
+                                                      {{ Form::select('form',[ 'Damage Assessment Form' => 'Damage Assessment Form', 'Construction Form' => 'Construction Form', 'Environment Form' => 'Environment Form','Gender From'=>'Gender Form','Social Form'=>'Social Form','VRC Form'=>'VRC Form'],'id',['class'=>'form-control', 'id'=>'form']) }}
+                                        </div>
+
+
+
+
+                                        <div class="filters-toolbar__item mb-3 col-md-4">
+                                                <label class="form-label">{{ __('Search By Role') }}</label>
+                                                {!! Form::select('role', $roles, null, array('placeholder' => 'Select Role', 'class' => 'role form-control select2', 'id'=>'role')) !!}
+                                        </div>
+                                        <div class="filters-toolbar__item mb-3 col-md-4">
+                                                <label class="form-label">{{ __('Search By User') }}</label>
+                                                {!! Form::select('user', [], null, array('placeholder' => 'Select User', 'class' => 'user form-control select2', 'id'=>'user')) !!}
+                                        </div>
+
+                                        <div class="filters-toolbar__item mb-3 col-md-4">
                                                 <label class="form-label">{{ __('Search By District') }}</label>
                                                 {!! Form::select('district', $districts, null, array('placeholder' => 'Select District', 'class' => 'district form-control select2', 'id'=>'district')) !!}
                                         </div>
@@ -71,10 +93,7 @@ input.form-control.btn.btn-success.my-4 {
                             
                                   
                                   
-                                    <div class='select_all_button' style="text-align:justify;">
-                                    <button id="checkAllButton" class='btn btn-danger'>Select all</button>
-                                    <button id="deCheckAllButton" class='btn btn-danger'>Deselect all</button>
-                                    </div>
+                                 
                                     <!--form end-->
                                     <div class="filter_data"></div>
                                 </div>
@@ -141,6 +160,27 @@ input.form-control.btn.btn-success.my-4 {
 $(document).ready(function() {
 $('.select2').select2();    
     
+	$('body').on('change', '.role', function(e){
+     e.preventDefault();
+		var role_id = $(e.target).find("option:selected").val();
+		$.ajax({
+              url: "{{ route('get_users_according_to_role') }}",
+              type: 'POST',
+              data: {role_id: role_id, _token: '{{csrf_token()}}'},
+              beforeSend: function(){
+                  $('.user').html('User list Processing...');
+              },
+              success: function (response) {
+                console.log(response);
+                
+				 $('.user').empty();				 
+				 $('.user').html(response);
+				 $('.select2').select2();
+				 filter_data();
+			  },
+              error: function (response){$('.tehsil_list').empty(); $('.uc_list').empty(); }
+              });
+    });
 	$('body').on('change', '.district', function(e){
      e.preventDefault();
 		var district_id = $(e.target).find("option:selected").val();
@@ -194,12 +234,15 @@ $(document).ready(function(){
         $('.filter_data').html('<div id="loading"></div>');
         var action = 'fetch_data';
         var sorting = $("#sorting").val();
+        var form = $("#form").val();
         var direction = $("#direction").val();
         var qty = $("#qty").val();
         var trench = $("#trench").val();
    
         
         var district = $("#district").val();
+        var role = $("#role").val();
+        var user = $("#user").val();
         var tehsil_id = $("#tehsil_id").val();
         var uc_id = $("#uc_id").val();
         
@@ -215,11 +258,10 @@ $(document).ready(function(){
 
        $.ajax({
           type: 'POST',
-          data:{action:action, district:district, tehsil_id:tehsil_id, uc_id:uc_id,trench:trench, b_reference_number:b_reference_number,bank_name:bank_name,beneficiary_name:beneficiary_name, cnic:cnic, sorting:sorting, direction:direction, qty:qty, ayis_page:ayis_page, _token: '{{csrf_token()}}'},
-          url: "{{ route('firsttrench_fetch_data') }}",
+          data:{action:action, district:district,role:role,user:user, tehsil_id:tehsil_id, uc_id:uc_id,trench:trench, b_reference_number:b_reference_number,bank_name:bank_name,beneficiary_name:beneficiary_name, cnic:cnic, sorting:sorting,form:form,direction:direction, qty:qty, ayis_page:ayis_page, _token: '{{csrf_token()}}'},
+          url: "{{ route('overall_fetch_report_data') }}",
 		   beforeSend: function(){$('.filter_data').html('<center><img src="{{ asset('images/loading.gif') }}" width="100" alt="Loader" /></center>');},
            success:function(data){
-               
                   $('.filter_data').html(data);
               },
            error: function(data){console.log(data);}
@@ -250,7 +292,7 @@ $(document).ready(function(){
     
     
 
-    $('body').on('change', '#sorting, #direction, #qty, #district, #tehsil_id, #uc_id, #trench', function(e){
+    $('body').on('change', '#sorting, #direction, #qty, #district, #tehsil_id,#role,#user, #uc_id, #trench, #form', function(e){
             e.preventDefault();
             filter_data();
     });
@@ -271,115 +313,12 @@ $(document).ready(function(){
 });
 
 
-        $(document).ready(function () {
+  
+        
        
-            var selectedValues = [];
-            
-            
-        $(document).on('change', '.get_id', function() {
-            var selectedValues=$('#ref_no_data').val();  
-            selectedValues= toArray(selectedValues);
-            var value = $(this).val();
-              
-               if ($(this).is(':checked')) {
-                    selectedValues.push(value);
-                } else {
-                    selectedValues = $.grep(selectedValues, function (item) {
-                        return item !== value;
-                    });
-                }
-                let count = Math.max(0, selectedValues.length - 1);
-                $('#show_selected_count').text(`Selected Data Count: ${count}`);
-                $('#ref_no_data').val(selectedValues.join(','));
-                var token = $('meta[name="csrf-token"]').attr("content");
-                $.ajax({
-                        type: "POST",
-                        url: `{{ route('add_ref_session') }}`,
-                        data: {
-                            selectedValues: selectedValues,
-                            _token: token,
-                        },
-                        success: function (response) {
-                        
-                          
-                           
-                        },
-                        error: function (request, status, error) {
-                            console.log(error);
-                            alert("Couldn't retrieve lots. Please try again later.");
-                        },
-                    });
-    });
-        $(document).on('click', '#checkAllButton', function () {
-            var selectedValues=$('#ref_no_data').val();  
-            selectedValues= toArray(selectedValues);
-        $('.get_id').each(function () {
-            $(this).prop('checked', true); // Check all checkboxes
-            var value = $(this).val();
-            if (!selectedValues.includes(value)) {
-                selectedValues.push(value);
-            }
-        });
-        let count = Math.max(0, selectedValues.length - 1);
-        $('#show_selected_count').text(`Selected Data Count: ${count}`);
-        $('#ref_no_data').val(selectedValues.join(','));
+        
      
-        var token = $('meta[name="csrf-token"]').attr("content");
-        $.ajax({
-            type: "POST",
-            url: `{{ route('add_ref_session') }}`,
-            data: {
-                selectedValues: selectedValues,
-                _token: token,
-            },
-            success: function (response) {
-                console.log(response);
-            },
-            error: function (request, status, error) {
-                console.error(error);
-                alert("Couldn't retrieve lots. Please try again later.");
-            },
-        });
-    });
-        $(document).on('click', '#deCheckAllButton', function () {
-         
-            $('.get_id').each(function () {
-                $(this).prop('checked', false); // Check all checkboxes
-            });
-            let count = 0;
-            $('#show_selected_count').text(`Selected Data Count: ${count}`);
-            $('#ref_no_data').val('');
-            var token = $('meta[name="csrf-token"]').attr("content");
-            selectedValues=[];
-            $.ajax({
-                type: "POST",
-                url: `{{ route('add_ref_session') }}`,
-                data: {
-                    selectedValues: selectedValues,
-                    _token: token,
-                },
-                success: function (response) {
-                    console.log(response);
-                },
-                error: function (request, status, error) {
-                    console.error(error);
-                    alert("Couldn't retrieve lots. Please try again later.");
-                },
-            });
-             
-            
-            });
-            
-            
-            $(document).on('change', '#trench', function () {
-            var trench=$(this).val();
-            $('#trench_no').val(trench);
-            $('#ref_no_data').val('');
-            });
-    
-    
-    
-        });
+       
 
            
       

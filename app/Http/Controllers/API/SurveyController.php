@@ -413,6 +413,28 @@ class SurveyController extends BaseController
                         ->where("section_id", $section->id)
                         ->select("id as option_id", "name", "question_id", "answer", "variable_type", "is_replicable")
                         ->get();
+                    if ($question->location_condition == 'vrc_designation' || $question->location_condition =='vrc_event') {
+                        $designation = [];
+                        if($question->location_condition=='vrc_designation'){
+                            $table='vrc_designation';
+                        }else{
+                            
+                            $table='vrc_event';
+                        }
+                        $vrc_designation=DB::table($table)->where('status',1)->get();
+                        foreach ($vrc_designation as $index => $item) {
+                            $designation[] = [
+                                'option_id' => $question->id . '_' . ($index + 1),
+                                'name' => $item->name,
+                                'question_id' => $question->id,
+                                'answer' => null,
+                                'variable_type' => null,
+                                'is_replicable' => 0,
+                                'parent_index' => 0
+                            ];
+                        }
+                        $options = collect($designation);
+                    }      
                     
                     
                   
@@ -545,8 +567,15 @@ public function form_data_upload(Request $request)
           if(!$request->rejected_form_id){
               $survey_ids = DB::table('survey_form')->pluck('ref_no')->toArray();
               $survey_cnic = DB::table('survey_form')->pluck('cnic')->toArray();
-              if (in_array($beneficiary_number,$survey_ids) || in_array($b_cnic,$survey_cnic)) {
+              if (in_array($beneficiary_number,$survey_ids)) {
               return $this->sendError('Validation Error.', "This beneficiary is already registered in the system!");
+              }
+              if (isset($b_cnic) && in_array($b_cnic,$survey_cnic)) {
+              return $this->sendError('Validation Error.', "Duplicate cnic!");
+              }
+            }else{
+              if ((isset($b_cnic) && in_array($b_cnic,$survey_cnic)) ) {
+              return $this->sendError('Validation Error.', "Duplicate cnic!");
               }
           }
           
@@ -1839,6 +1868,30 @@ public function couting_beneficiary(Request $request,$id){
 	}
 	
 	
+public function approved_by_ceo(){
+     $survey_data =DB::table('form_status')
+         ->join('users','form_status.user_id','=','users.id')
+         ->join('survey_form','form_status.form_id','=','survey_form.id')
+         ->join('form','survey_form.form_id','=','form.id')
+         ->join('roles','users.role','=','roles.id')
+         ->select('form_status.id as form_status_id','users.name as validator_name','form_status.form_status',
+         'form.name as form_name','survey_form.id as survey_form_id','survey_form.generated_id',
+         'form_status.is_m_and_e','roles.name as role_name','users.email as email'
+         ,'form_status.is_m_and_e','survey_form.priority as priority','survey_form.created_at as submission_date',
+         'survey_form.ref_no as ref_no'
+         ,'survey_form.beneficiary_name as beneficiary_name'
+         ,'survey_form.cnic2 as cnic'
+         ,'survey_form.father_name as father_name'
+         
+         )
+         ->where('form_status.form_status','A')
+         ->where('form_status.update_by','CEO')
+         ->orderBy('survey_form.priority','Desc')
+         ->get()->toArray();
+         return response()->json(['data' => $survey_data], 200);
+}	
+	
+	
 //Ayaz Construction Module Start
 public function constructionupdatte(Request $request)
 {
@@ -1988,23 +2041,7 @@ public function survey_form_construction_stage1_upload(Request $request){
   
      
       
-            //   $image_ids=DB::table('contructions_answer')->where('ref_no',$request->ref_no)->where('construction_json_id',$construction_json)->where('type','image')->get();
-            //     foreach($image_ids as $answer){
-            //         $file = base64_file_save_for_constructure($answer);
-                  
-            //         if($file){
-            //         //   $remove_json= json_form_data_all_question_modified_constrcuture($construction_json);
-            //         //   return $remove_json;
-            //         return response()->json(['success'=>"construction data uploaded successfully"],200);
-                       
-            //         }else{
-                        
-            //         return response()->json(['error'=>"some error found data not uploaded"],400);
-            //         }
-                    
-                   
- 
-            //     }
+          
         
         
 }

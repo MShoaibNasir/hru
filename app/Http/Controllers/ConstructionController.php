@@ -33,7 +33,7 @@ class ConstructionController extends Controller
     
 	public function total_construction_datalist_fetch_data(Request $request, Construction $constructiondata)
 	{
-	    //dump($request->all());
+	 
 	    $page = $request->get('ayis_page');
         $qty = $request->get('qty');
         $custom_pagination_path = '';
@@ -162,15 +162,7 @@ class ConstructionController extends Controller
 	    
 	    
 	    
-	if($id == 341){ 
-	    //construction_destructure($id);
-	    
-	    //$constructions = Construction::pluck('id');
-	    //foreach($constructions as $construction_id){
-	        //echo $construction_id;
-	    //construction_destructure($construction_id);
-	    //}
-	}
+	
 	
    $construction = Construction::findOrFail($id);
 
@@ -272,10 +264,7 @@ class ConstructionController extends Controller
 	  $decision = $request->decision;
 	  $comment = $request->comment;
 	  $status = $decision === 'approve' ? 'A' : ($decision === 'reject' ? 'R' : ($decision === 'hold' ? 'H' : ''));
-	  //$status = $decision === 'approve' ? 'A' : ($decision === 'reject' ? 'R' : ($decision === 'hold' ? 'H' : ($decision === 'pending' ? 'P' : '')));
-
-
-		    $construction = Construction::findORFail($construction_id);
+	   $construction = Construction::findORFail($construction_id);
 		    //30, FS
 		    //34, IP
 		    //36, HRU
@@ -363,6 +352,102 @@ class ConstructionController extends Controller
 	  
 	}
 	}
+
+
+    public function construction_action_bulk(Request $request){
+        
+    $construction_ids = isset($request->construction_ids) ? explode(',', $request->construction_ids) : [];
+    if(count($construction_ids)<=0){
+        return redirect()->back()->with('error', 'Kindly select at least one construction form to proceed further!');
+    }
+    foreach ($construction_ids as $id) {
+       
+        $role = Role::findORFail(Auth::user()->role);
+        $construction_id = $id;
+        $decision = 'approve';
+        $comment = 'Bulk Approve';
+        $status = $decision === 'approve' ? 'A' : ($decision === 'reject' ? 'R' : ($decision === 'hold' ? 'H' : ''));
+        $construction = Construction::findORFail($construction_id);
+           
+        if($construction->role_id == 30 && $status == 'A'){
+         update_construction_status($construction_id,34,'P',$status);
+           update_construction_departmentwise_status($construction_id,30,'A', $comment);
+           update_construction_departmentwise_status($construction_id,34,'P', $comment);
+        }elseif($construction->role_id == 34 && $status == 'A'){
+         update_construction_status($construction_id,36,'P',$status);
+           update_construction_departmentwise_status($construction_id,34,'A', $comment);
+           update_construction_departmentwise_status($construction_id,36,'P', $comment);
+        }elseif($construction->role_id == 36 && $status == 'A'){
+         update_construction_status($construction_id,37,'P',$status);
+           update_construction_departmentwise_status($construction_id,36,'A', $comment);
+           update_construction_departmentwise_status($construction_id,37,'P', $comment);
+        }elseif($construction->role_id == 37 && $status == 'A'){
+         update_construction_status($construction_id,48,'P',$status);
+           update_construction_departmentwise_status($construction_id,37,'A', $comment);
+           update_construction_departmentwise_status($construction_id,48,'P', $comment);
+        }elseif($construction->role_id == 48 && $status == 'A'){
+         update_construction_status($construction_id,48,'C',$status);
+           update_construction_departmentwise_status($construction_id,48,'A', $comment);
+        
+         
+         
+        }elseif($construction->role_id == 48 && $status == 'R'){
+         update_construction_status($construction_id,37,'P',$status);
+           update_construction_departmentwise_status($construction_id,48,'R', $comment);
+           update_construction_departmentwise_status($construction_id,37,'P', $comment);
+        }elseif($construction->role_id == 37 && $status == 'R'){
+         update_construction_status($construction_id,36,'P',$status);
+           update_construction_departmentwise_status($construction_id,37,'R', $comment);
+           update_construction_departmentwise_status($construction_id,36,'P', $comment);
+        }elseif($construction->role_id == 36 && $status == 'R'){
+         update_construction_status($construction_id,34,'P',$status); 
+           update_construction_departmentwise_status($construction_id,36,'R', $comment);
+           update_construction_departmentwise_status($construction_id,34,'P', $comment);
+        }elseif($construction->role_id == 34 && $status == 'R'){
+         update_construction_status($construction_id,30,'P',$status);
+           update_construction_departmentwise_status($construction_id,34,'R', $comment);
+           update_construction_departmentwise_status($construction_id,30,'P', $comment);
+        }elseif($construction->role_id == 30 && $status == 'R'){
+         update_construction_status($construction_id,27,'R',$status);
+           update_construction_departmentwise_status($construction_id,30,'R', $comment);
+           
+           
+           
+        }elseif($construction->role_id == 30 && $status == 'H'){
+           update_construction_departmentwise_status($construction_id,30,'H', $comment);
+        }elseif($construction->role_id == 34 && $status == 'H'){
+           update_construction_departmentwise_status($construction_id,34,'H', $comment);
+        }elseif($construction->role_id == 36 && $status == 'H'){
+           update_construction_departmentwise_status($construction_id,36,'H', $comment);
+        }elseif($construction->role_id == 37 && $status == 'H'){
+           update_construction_departmentwise_status($construction_id,37,'H', $comment);
+        }elseif($construction->role_id == 48 && $status == 'H'){
+           update_construction_departmentwise_status($construction_id,48,'H', $comment);
+        }
+
+
+        $data = $request->all();
+        $data['construction_id'] = $construction_id;
+        $data['stage'] = $construction->stage;
+        $data['ref_no'] = $construction->ref_no;
+        $data['action_by'] = Auth::user()->id;
+        
+        $data['role_id'] = $role->id;
+        $data['role_name'] = $role->name;
+        $data['status'] = $status;
+        
+        //$data['lot_id'] = $construction->lot_id;
+        $data['action'] = $decision;
+        $data['comment'] = $comment;
+
+        //dump($data);
+        
+        $result = ConstructionStatusHistory::create($data);
+        
+    }  
+    return redirect()->back()->with('success', 'Form approved in bulk successfully!');
+			
+    }
 	
     
     

@@ -231,6 +231,7 @@ Route::prefix('admin/construction')->middleware('auth.redirect')->group(function
     Route::get('/construction_status_trail_history', [constructionController::class, 'construction_status_trail_history'])->name('construction_status_trail_history');
     Route::post('/construction_action_form', [constructionController::class, 'construction_action_form'])->name('construction_action_form');
     Route::post('/construction_action_form_submit', [constructionController::class, 'construction_action_form_submit'])->name('construction_action_form_submit');
+    Route::post('/construction_action_bulk', [constructionController::class, 'construction_action_bulk'])->name('construction_action_bulk');
     
 });
 

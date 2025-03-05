@@ -224,7 +224,6 @@ class FirstBatchController extends Controller
 	    $trench_no=$data->trench_no;
 	    $districts = District::pluck('name','id')->all();
 	    $edit_ref_no = FirstBatch::distinct()->where('batch_id',$id)->whereNotNull('ref_no')->pluck('ref_no')->toArray();
-	
 	    $edit_ref_no=implode(',',$edit_ref_no);
 		$bank = Bank::pluck('name','id')->all();
 		Session::forget('selectedRefNo');

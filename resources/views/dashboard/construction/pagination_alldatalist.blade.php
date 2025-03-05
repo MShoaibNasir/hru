@@ -11,6 +11,9 @@ Showing {{ $data->firstItem() }} to {{ $data->lastItem() }} of total {{$data->to
  <thead>
  <tr>
     <th scope="col">Actions</th>
+    @if(Auth::check() && Auth::user()->role==48)
+    <th scope="col">Select Construction</th>
+    @endif
     <th scope="col">Date</th>
     <th scope="col">Create By</th>
     <th scope="col">Ref No</th>
@@ -19,12 +22,10 @@ Showing {{ $data->firstItem() }} to {{ $data->lastItem() }} of total {{$data->to
     <th scope="col">Get Action</th>
     <th scope="col">Status</th>
     <th scope="col">Report Trail</th>
-    
     <th scope="col">Last Action Perform</th>
     <th scope="col">Last Status</th>
     <th scope="col">Last Action By</th>
     <th scope="col">Last Department</th>
-    
     <th scope="col">Lot</th>
     <th scope="col">District</th>
     <th scope="col">Tehsil</th>
@@ -50,6 +51,11 @@ $aging = Carbon\Carbon::parse($item->action_date)->diffInDays(Carbon\Carbon::now
   @endphp
         <tr @class(['table-danger' => $aging > 14])>
                                 <td><a href='{{ route("construction.view",[$item->id]) }}' target="_blank" class='btn btn-success'>View ID:{{ $item->id }}</a></td>
+                                @if(Auth::check() && Auth::user()->role==48 && $item->action_condition == 3 && $item->status == 'P')
+                                <td><input type='checkbox' class='check_id' value='{{$item->id}}'></td>
+                                @else
+                                <td></td>
+                                @endif
                                 <td>{{ Carbon\Carbon::parse($item->created_at)->format('d-m-Y') }}</td>
                                 <td>{{$item->getuser->name ?? ''}}</td>
                                 <td>{{$item->ref_no ?? ''}}</td>

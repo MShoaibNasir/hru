@@ -41,4 +41,7 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
     protected $dates = ['deleted_at'];
+
+
+   
 }

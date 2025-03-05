@@ -1,5 +1,10 @@
 @extends('dashboard.layout.master')
 @section('content')
+<style>
+    form {
+    text-align: left;
+    }
+</style>
 
 <div class="content">
     <!-- Navbar Start -->
@@ -109,6 +114,16 @@
                                                 </div>
                                             </div>
                                         </div>
+
+   @if(Auth::check() && Auth::user()->role==48)
+      <form action="{{route('construction_action_bulk')}}" method="post">
+           @csrf
+        <input type="hidden" name="construction_ids" id="construction_ids">
+        <input type="submit" value='Bulk Approved' class='btn btn-success btn-sm'>
+      </form>
+   @endif
+
+
                                         <!--End Toolbar-->
                                     <div class="filter_data"></div>
                                 </div>
@@ -237,6 +252,21 @@ $('.select2').select2();
 			  },
               error: function (response){$('.uc_list').empty();}
               });
+    });
+
+
+
+    var selectedValues=[];
+    $(document).on('change', '.check_id', function() {
+            var value = $(this).val();
+               if ($(this).is(':checked')) {
+                    selectedValues.push(value);
+                } else {
+                    selectedValues = $.grep(selectedValues, function (item) {
+                        return item !== value;
+                    });
+                }
+                $('#construction_ids').val(selectedValues);
     });
 	
 	

@@ -22,7 +22,11 @@ class FormStatus extends Model
     
     public function created_by()
     {
-		return $this->BelongsTo(User::class, 'user_id', 'id')->select('id', 'name');
+		return $this->BelongsTo(User::class, 'user_id', 'id');
+    }
+    public function role()
+    {
+		return $this->BelongsTo(Role::class, 'user_status', 'id')->select('id', 'name');
     }
     
     
