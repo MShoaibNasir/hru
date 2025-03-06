@@ -337,7 +337,6 @@ $(document).ready(function(){
             var selectedValues=$('#ref_no_data').val();  
             selectedValues= toArray(selectedValues);
             var value = $(this).val();
-              
                if ($(this).is(':checked')) {
                     selectedValues.push(value);
                 } else {

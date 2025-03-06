@@ -10,11 +10,15 @@ use App\Models\Bank;
 use Illuminate\Support\Facades\Session;
 use Auth;
 use Carbon\Carbon;
+use App\Repositories\Contracts\FinanceLogInterface;
 use App\Exports\FristTrenchData;
+
 use App\Exports\WithoutAccountGenerate;
 use App\Exports\AlreadyAccount;
 use App\Exports\WithoutAccount;
 use App\Exports\WithAccount;
+use App\Exports\FinanceLog;
+use App\Models\FinanceActivities;
 use App\Exports\ReadyForDisbursment;
 use App\Models\District;
 use App\Exports\BioMetricStatus;
@@ -26,6 +30,12 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class FinanceController extends Controller
 {
+    protected $FinanceLogReposatory;
+
+    public function __construct(FinanceLogInterface $FinanceLogReposatory)
+    {
+        $this->FinanceLogReposatory = $FinanceLogReposatory;
+    }
     public function financeList(Request $requets)
     {   
         $search=null;
@@ -539,92 +549,7 @@ public function updateBioMetricList(Request $request)
        
         return view('dashboard.finance.uploadAccount');
     }
-    // public function uploadAccount(Request $request){
-      
-      
-        
-    //      if ($request->hasFile('csv_file')) {
-    //             $file = $request->file('csv_file');
-    //             $fileExtension = $file->getClientOriginalExtension();
-    //             if ($fileExtension !== 'csv') {
-    //                 return redirect()->back()->with(['error','file must be in csv']);
-                
-    //             }
-    //      }
-        
-        
-        
-
-     
-    //       // Initialize counters
-    //     $duplication = 0;
-    //     $insertion = 0;
-    //     $ref_no_list=DB::table('verify_beneficairy')->pluck('ref_no')->toArray();
-    //     $survey_id_list=DB::table('verify_beneficairy')->pluck('survey_id')->toArray();
-     
-    //      if (($handle = fopen($file->getRealPath(), 'r')) !== false) {
-        
-    //     $data= fgetcsv($handle);
-        
-    //     // Process the file in chunks
-    //     while (($data = fgetcsv($handle, 1000, ',')) !== false) {
-    //         $survey_id=DB::table('survey_form')->where('ref_no',$data[0])->select('id')->first();
-    //         $row = [
-    //             'ref_no' => $data[0] ?? null,
-    //             'beneficiary_name' => $data[1] ?? null,
-    //             'account_number' => $data[2] ?? null,
-    //             'bank_name' => $data[3] ?? null,
-    //             'branch_name' => $data[4] ?? null,
-    //             'bank_address' => $data[5] ?? null
-
-    //         ];
-            
-           
-          
-    //         if (empty($row['ref_no']) || empty($row['account_number']) || empty($row['bank_name']) || empty($row['branch_name']) || empty($row['bank_address'])) {
-    //              continue;
-    //       }
-    //       $check_ref=DB::table('survey_form')->join('form_status','survey_form.id','=','form_status.form_id')
-    //       ->where('survey_form.ref_no',$row['ref_no'])
-    //       ->where('form_status.form_status','A')
-    //       ->where('form_status.update_by','CEO')
-    //       ->select('form_status.update_by')
-    //       ->first();
-           
-    //      if(isset($check_ref) && $check_ref->update_by='CEO'){   
-    //         if (in_array($row['ref_no'], $ref_no_list)) {
-    //             $duplication++;
-    //         } else {
-    //             $insertion++;
-                
-    //             if(isset($row['beneficiary_name'])){
-    //             $survey_id=DB::table('survey_form')->where('ref_no',$row['ref_no'])->select('id')->first();
-    //             $beneficiary_name= $this->update_answer_for_name($survey_id->id,$row['beneficiary_name']);
-    //             DB::table('survey_form')->where('id',$survey_id->id)->update(['beneficiary_name'=>$row['beneficiary_name']]);
-    //             update_answer_finance_activities($survey_id->id,Null,$row['beneficiary_name']);
-    //             }
-            
-    //           $verifyBeneficairy = VerifyBeneficairy::create($row);
-    //             DB::table('finance_activities')->insert([
-    //             'ref_no'=>$row['ref_no'], 
-    //             'table_name'=>'verify_beneficairy', 
-    //             "user_id"=>Auth::user()->id,
-    //             'primary_id'=>$verifyBeneficairy->id,
-    //             "action"=>"upload_accounts"
-    //             ]);
-    //         }
-    //      }    
-    //     }
-
-    //     fclose($handle);
-    // }
-    
-    //      addLogs('Upload the bank accounts of those beneficiaries who do not have a bank account.', Auth::user()->id,'upload accounts','finance management');
-    
-    //      return back()->with('success', "CSV file uploaded successfully. Total Duplications: $duplication, Total Insertions: $insertion.");
-         
-    // }
-    
+   
     
     
 
@@ -642,6 +567,7 @@ public function uploadAccount(Request $request)
     $insertion = 0;
     $insertedData = [];
     $duplicateData = [];
+    $notInsertedData = [];
 
     $ref_no_list = DB::table('verify_beneficairy')->pluck('ref_no')->toArray();
 
@@ -680,7 +606,13 @@ public function uploadAccount(Request $request)
 
                     $survey_id = DB::table('survey_form')->where('ref_no', $row['ref_no'])->value('id');
                     if ($survey_id) {
-                        DB::table('survey_form')->where('id', $survey_id)->update(['beneficiary_name' => $row['beneficiary_name']]);
+                        DB::table('survey_form')->where('id', $survey_id)->update(
+                            ['beneficiary_name' => $row['beneficiary_name'],
+                            'account_number'=>$row['account_number'],
+                            'bank_name'=>$row['bank_name'],
+                            'branch_name'=>$row['branch_name'],
+                            'bank_address'=>$row['bank_address']
+                        ]);
                         update_answer_finance_activities($survey_id, null, $row['beneficiary_name']);
                     }
 
@@ -694,6 +626,9 @@ public function uploadAccount(Request $request)
                         'action' => 'upload_accounts'
                     ]);
                 }
+            }
+            else{
+                $notInsertedData[] = $row;
             }
         }
         fclose($handle);
@@ -713,6 +648,9 @@ public function uploadAccount(Request $request)
     }
     foreach ($duplicateData as $row) {
         fputcsv($csvFile, array_merge($row, ['Duplicate']));
+    }
+     foreach ($notInsertedData as $row) {
+        fputcsv($csvFile, array_merge($row, ['Not Inserted']));
     }
 
     fclose($csvFile);
@@ -913,6 +851,8 @@ public function uploadAccount(Request $request)
         }
         $beneficiary_ids = $request->ref_no_data;
         $beneficiary_ids = explode(",", $beneficiary_ids);
+        unset($beneficiary_ids[0]);
+       
     
      
 
@@ -2118,10 +2058,136 @@ public function uploadAccount(Request $request)
     }
     
     
+    public function financeLogsFilter(){
+        $district=DB::table('districts')->get();
+		return view('dashboard.finance.financeLogs.filter',['districts'=>$district]);
+    }
     
     
-    
+    public function financeLogsFetch(Request $request){
         
+        $page = $request->get('ayis_page');
+        $qty = $request->get('qty');
+        $custom_pagination_path = '';
+
+        $district = $request->get('district');
+        $log_action = $request->get('log_action');
+
+        $trench = $request->get('trench') ?? 1;
+        $bank_name = $request->get('bank_name');
+        $tehsil = $request->get('tehsil_id');
+        $uc = $request->get('uc_id');
+
+        $b_reference_number = $request->get('b_reference_number');
+ 
+        $beneficiary_name = $request->get('beneficiary_name');
+        $cnic = $request->get('cnic');
+
+        $sorting = $request->get('sorting');
+     
+        $order = $request->get('direction') ;
+
+        // Query the database
+        $form = FinanceActivities::query();
+
+        // Apply filters
+        if (!empty($district)) {
+            $form->where('survey_form.district_id', $district);
+        }
+        if (!empty($log_action)) {
+            $form->where('action', $log_action);
+        }
+
+       
+
+        if (!empty($tehsil)) {
+            $form->where('survey_form.tehsil_id', $tehsil);
+        }
+
+        if (!empty($uc)) {
+            $form->where('survey_form.uc_id', $uc);
+        }
+
+        if (!empty($b_reference_number)) {
+            $form->where('ref_no', $b_reference_number);
+        }
+
+        if (!empty($beneficiary_name)) {
+            $form->where('beneficiary_name', 'like', '%' . $beneficiary_name . '%');
+        }
+
+        if (!empty($cnic)) {
+            $form->where('cnic', 'like', '%' . $cnic . '%');
+        }
+
+        // Sorting
+        if ($sorting == 'b_reference_number') {
+            $sorting = 'ref_no';
+        }
+        $form->orderBy($sorting, $order);
+        $response = $form->paginate($qty, ['*'], 'page', $page)->setPath($custom_pagination_path);
+        
+        
+        
+            $selected_data = $form->get()->map(function ($item)  {
+            $action = ''; 
+            $batch = null;
+            if($item->action=='already_account_verify'){
+            $action='Account Verify';
+            }
+            if($item->action=='bio metric verification of beneficiaries'){
+            $action='Bio Metric Verify';
+            }
+            
+            if($item->action=='move_to_first_trench'){
+            $action='Move To First Trench';
+            } 
+            if($item->action=='move_to_second_trench'){
+            $action='Move To Second Trench';
+            } 
+            if($item->action=='move_to_third_trench'){
+            $action='Move To Third Trench';
+            
+            } 
+            if($item->action=='update_answer'){
+            $action='Answer Update';
+            } 
+            if($item->action=='upload_accounts'){
+            $action='Upload Account';
+            } 
+            if($item->action=='insert_batch'){
+            $action='Insert Batch';
+            $batch=\DB::table('batch')->where('id',$item->primary_id)->select('batch_no')->first();
+            
+            } 
+            if($item->action=='update_batch'){
+            $action='Update Batch';
+            $batch=\DB::table('batch')->where('id',$item->primary_id)->select('batch_no')->first();
+            
+            }
+          
+            return [
+                'user name' => get_user_name($item->user_id) ?? null,
+                'survey id' => $item->survey_id,
+                'ref no' => $item->ref_no ?? '',
+                'Action' => $action . (isset($batch) && $batch ? ' (' . $batch->batch_no . ')' : ''),
+                'Date' => Carbon::parse($item->created_at)->format('d-m-Y') ?? ''
+            ];
+        });
+        
+        $jsondata = json_encode($selected_data);
+        $data_array = $response->toArray()['data'];
+        return view('dashboard.finance.financeLogs.list',['data'=>$response,'jsondata'=>$jsondata]);
+    }
+    
+ 
+    
+      public function exportFinanceLog(Request $request) 
+    {
+        $data = $request->finance_logs;
+        $data = json_decode($data, true);
+        return Excel::download(new FinanceLog($data), '_finance_log_'.date('YmdHis').'.xlsx');
+    }
     
     
     

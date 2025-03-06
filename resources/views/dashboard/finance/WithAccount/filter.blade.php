@@ -389,37 +389,52 @@ $(document).ready(function () {
                         },
                     });
     });
+    
+    
+    
         $(document).on('click', '#checkAllButton', function () {
-        var selectedValues=$('#ref_no_data').val();  
-        selectedValues= toArray(selectedValues);
-        $('.get_id').each(function () {
+           var selectedValues = toArray($('#ref_no_data').val());
             
-              var selectedValues=$('#ref_no_data').val();  
-              selectedValues= toArray(selectedValues);
-            $(this).prop('checked', true); // Check all checkboxes
-            var value = $(this).val();
-            if (!selectedValues.includes(value)) {
-                selectedValues.push(value);
-            }
-        });
-        $('#ref_no_data').val(selectedValues.join(','));
-        var token = $('meta[name="csrf-token"]').attr("content");
-        $.ajax({
-            type: "POST",
-            url: `{{ route('add_ref_session') }}`,
-            data: {
-                selectedValues: selectedValues,
-                _token: token,
-            },
-            success: function (response) {
-                console.log(response);
-            },
-            error: function (request, status, error) {
-                console.error(error);
-                alert("Couldn't retrieve lots. Please try again later.");
-            },
-        });
+            
+            $('.get_id').each(function () {
+             
+        
+                $(this).prop('checked', true); // Check all checkboxes
+                var value = $(this).val();
+                if (!selectedValues.includes(value)) {
+                    selectedValues.push(value);
+                }
+            });
+            console.log(selectedValues);
+            $('#ref_no_data').val(selectedValues.join(','));
+            var token = $('meta[name="csrf-token"]').attr("content");
+            $.ajax({
+                type: "POST",
+                url: `{{ route('add_ref_session') }}`,
+                data: {
+                    selectedValues: selectedValues,
+                    _token: token,
+                },
+                success: function (response) {
+                    console.log(response);
+                },
+                error: function (request, status, error) {
+                    console.error(error);
+                    alert("Couldn't retrieve lots. Please try again later.");
+                },
+            });
     });
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
         $(document).on('click', '#deCheckAllButton', function () {
          
             $('.get_id').each(function () {
