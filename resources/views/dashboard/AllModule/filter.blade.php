@@ -8,6 +8,9 @@ input.form-control.btn.btn-success.my-4 {
     color:white !important;
 }
 td {
+    text-align: left !important;
+}
+th {
     text-align: left;
 }
 </style>
@@ -20,7 +23,7 @@ td {
     <div class="container-fluid pt-4 px-4 form_width">
         <div class="bg-light text-center rounded p-4">
             <div class="d-flex align-items-center justify-content-between mb-4">
-                <h6 class="mb-0">Tranche LIST</h6>
+                <h6 class="mb-0">All Module Report</h6>
             </div>
             
             <div class="row">
@@ -36,7 +39,7 @@ td {
 
                                         <div class="filters-toolbar__item mb-3 col-md-4">
                                                       <label for="form">Search by Form Name</label>
-                                                      {{ Form::select('form',[ 'Damage Assessment Form' => 'Damage Assessment Form', 'Construction Form' => 'Construction Form', 'Environment Form' => 'Environment Form','Gender From'=>'Gender Form','Social Form'=>'Social Form','VRC Form'=>'VRC Form'],'id',['class'=>'form-control', 'id'=>'form']) }}
+                                                      {{ Form::select('form',[ 'Damage Assessment Form' => 'Damage Assessment Form','MNE Form'=>'MNE Form', 'Construction Form' => 'Construction Form', 'Environment Form' => 'Environment Form','Gender From'=>'Gender Form','Social Form'=>'Social Form','VRC Form'=>'VRC Form'],'id',['class'=>'form-control', 'id'=>'form']) }}
                                         </div>
 
 
@@ -72,7 +75,7 @@ td {
                 										
                 									<div class="filters-toolbar__item mb-3 col-md-4">
                                                       <label for="Sorting">Sort By</label>
-                                                      {{ Form::select('sorting',[ 'id' => 'ID', 'b_reference_number' => 'Refrence Number', 'beneficiary_name' => 'Beneficiary Name'],'id',['class'=>'form-control', 'id'=>'sorting']) }}
+                                                      {{ Form::select('sorting',[ 'id' => 'ID'],'id',['class'=>'form-control', 'id'=>'sorting']) }}
                                                     </div>
                                                     
                 									<div class="filters-toolbar__item mb-3 col-md-4">

@@ -5,25 +5,27 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class MNEStatusHistory extends Model
+class VRCStatusHistory extends Model
 {
     use HasFactory;
-    protected $table='mne_status_histories';
+    protected $table='vrc_status_histories';
     protected $guarded=['id'];
     
-    public function mne()
+    public function vrc()
     {
-		return $this->BelongsTo(MNE::class, 'id', 'mne_id');
+		return $this->BelongsTo(VRC::class, 'id', 'vrc_id');
     }
-    public function get_mne()
+
+    public function get_vrc()
     {
-		return $this->BelongsTo(MNE::class, 'mne_id', 'id');
+		return $this->BelongsTo(SocialSafeguard::class, 'vrc_id', 'id');
     }
     
     public function created_by()
     {
 		return $this->BelongsTo(User::class, 'action_by', 'id')->select('id', 'name');
     }
+
     public function role()
     {
 		return $this->BelongsTo(Role::class, 'role_id', 'id')->select('id', 'name');

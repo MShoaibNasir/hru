@@ -218,10 +218,6 @@ Route::prefix('admin/survey')->middleware('auth.redirect')->group(function () {
     Route::get('approved_by_ceo', [surveyController::class, 'approved_by_ceo'])->name('approved_by_ceo');
     Route::get('survey_approved_data_testing', [surveyController::class, 'survey_approved_data_testing'])->name('survey_approved_data_testing');
     Route::get('hold', [surveyController::class, 'survey_hold_data'])->name('survey.hold.form');
-    
-    
-   
-
 });
 
 Route::prefix('admin/construction')->middleware('auth.redirect')->group(function () {

@@ -4,6 +4,11 @@
     form {
     text-align: left;
     }
+
+    .select_all_button {
+    margin-top:30px;
+}
+
 </style>
 
 <div class="content">
@@ -121,6 +126,11 @@
         <input type="hidden" name="construction_ids" id="construction_ids">
         <input type="submit" value='Bulk Approved' class='btn btn-success btn-sm'>
       </form>
+      <div class='select_all_button' style="text-align:justify;">
+      <button class="btn btn-success btn-sm" id="checkAllButton">Select All</button>
+      <button id="deCheckAllButton" class='btn btn-danger btn-sm'>Deselect all</button>
+
+      </div>
    @endif
 
 
@@ -268,6 +278,42 @@ $('.select2').select2();
                 }
                 $('#construction_ids').val(selectedValues);
     });
+
+
+
+    $(document).on('click', '#checkAllButton', function () {
+        var selectedValues=[];
+        $('.check_id').each(function () {
+            $(this).prop('checked', true); 
+            var value = $(this).val();
+            if (!selectedValues.includes(value)) {
+                selectedValues.push(value);
+            }
+        });
+        $('#construction_ids').val(selectedValues);
+       
+    });
+
+
+    $(document).on('click', '#deCheckAllButton', function () {
+    
+        
+         
+         $('.check_id').each(function () {
+
+             $(this).prop('checked', false); 
+         });
+         $('#construction_ids').val('');
+         });
+
+
+
+
+
+
+
+
+
 	
 	
 	

@@ -15,10 +15,21 @@ class ConstructionStatusHistory extends Model
     {
 		return $this->BelongsTo(Construction::class, 'id', 'construction_id');
     }
+    public function get_construction()
+    {
+		return $this->BelongsTo(Construction::class, 'construction_id', 'id');
+    }
     
     public function created_by()
     {
 		return $this->BelongsTo(User::class, 'action_by', 'id')->select('id', 'name');
     }
+    public function role()
+    {
+		return $this->BelongsTo(Role::class, 'role_id', 'id')->select('id', 'name');
+    }
+  
+  
+
     
 }

@@ -13,25 +13,25 @@ class SocialSafeguard extends Model
     protected $guarded=['id'];
     public $timestamps = false;
     
-//     public function getlot()
-//     {
-// 		return $this->BelongsTo(Lot::class, 'lot_id', 'id')->select('id', 'name');
-//     }
+    public function getlot()
+    {
+		return $this->BelongsTo(Lot::class, 'lot', 'id')->select('id', 'name');
+    }
     
-//     public function getdistrict()
-//     {
-// 		return $this->BelongsTo(District::class, 'district_id', 'id')->select('id', 'name');
-//     }
+    public function getdistrict()
+    {
+		return $this->BelongsTo(District::class, 'district', 'id')->select('id', 'name');
+    }
     
-//     public function gettehsil()
-//     {
-// 		return $this->BelongsTo(Tehsil::class, 'tehsil_id', 'id')->select('id', 'name'); 
-//     }
+    public function gettehsil()
+    {
+		return $this->BelongsTo(Tehsil::class, 'tehsil', 'id')->select('id', 'name'); 
+    }
     
-//     public function getuc()
-//     {
-// 		return $this->BelongsTo(UC::class, 'uc_id', 'id')->select('id', 'name');
-//     }
+    public function getuc()
+    {
+		return $this->BelongsTo(UC::class, 'uc', 'id')->select('id', 'name');
+    }
     
     public function getuser()
     {

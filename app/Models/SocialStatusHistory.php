@@ -13,12 +13,21 @@ class SocialStatusHistory extends Model
     
     public function Social()
     {
-		return $this->BelongsTo(SocialSafeguard::class, 'id', 'gender_id');
+		return $this->BelongsTo(SocialSafeguard::class, 'id', 'social_id');
+    }
+    public function get_social()
+    {
+		return $this->BelongsTo(SocialSafeguard::class, 'social_id', 'id');
     }
     
     public function created_by()
     {
 		return $this->BelongsTo(User::class, 'action_by', 'id')->select('id', 'name');
+    }
+
+    public function role()
+    {
+		return $this->BelongsTo(Role::class, 'role_id', 'id')->select('id', 'name');
     }
     
 }
